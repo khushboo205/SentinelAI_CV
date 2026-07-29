@@ -1,0 +1,29 @@
+project:
+  name: SentinelAI
+  version: 1.0
+
+system:
+  device: auto
+  log_level: INFO
+
+detector:
+  model: yolo11m.pt
+  confidence: 0.35
+  image_size: 640
+
+tracker:
+  algorithm: bytetrack
+
+reid:
+  enabled: true
+
+ocr:
+  enabled: true
+
+database:
+  type: sqlite
+  path: database/sentinel.db
+
+output:
+  save_frames: true
+  save_reports: true
