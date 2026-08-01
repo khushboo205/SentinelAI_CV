@@ -13,28 +13,23 @@ class Visualizer:
 
         frame = packet.frame_packet.frame.copy()
 
-        for detection in packet.detections:
+        if hasattr(packet, "tracks"):
 
-            x1, y1, x2, y2 = map(int, detection.bbox)
+            for track in packet.tracks:
 
-            cv2.rectangle(
-                frame,
-                (x1, y1),
-                (x2, y2),
-                (0, 255, 0),
-                2
-            )
+                x1, y1, x2, y2 = map(int, track.detection.bbox)
 
-            label = f"{detection.class_name} {detection.confidence:.2f}"
+                label = f"{track.detection.class_name} #{track.track_id}"
 
-            cv2.putText(
-                frame,
-                label,
-                (x1, y1 - 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
-                (0, 255, 0),
-                2
-            )
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
+                cv2.putText(
+                    frame,
+                    label,
+                    (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (0, 255, 0),
+                    2,
+                )
         return frame

@@ -1,36 +1,60 @@
 from ultralytics import YOLO
 import cv2
 
-MODEL_PATH = "yolo11n.pt"   # or "models/detectors/yolo11n.pt"
+MODEL_PATH = "yolo11n.pt"
 
 try:
     print("Loading model...")
     model = YOLO(MODEL_PATH)
     print("✅ Model loaded successfully!")
 
-    # Create a dummy image (black image)
-    image = cv2.imread("data/images/test.jpg")
+    image = cv2.imread("data/images/market.jpg")
 
     if image is None:
         print("❌ Test image not found.")
-        print("Place an image at: data/images/test.jpg")
         exit()
 
     print("Running inference...")
-    results = model.predict(image, verbose=False)
+
+    results = model.predict(
+        image,
+        conf=0.20,
+        verbose=False
+    )
 
     print("✅ Inference completed!")
 
-    for result in results:
-        print(f"Detections: {len(result.boxes)}")
+    result = results[0]
 
-        for box in result.boxes:
-            print(
-                f"Class: {int(box.cls)}, "
-                f"Confidence: {float(box.conf):.2f}"
-            )
+    print(f"\nTotal Detections : {len(result.boxes)}")
+
+    for i, box in enumerate(result.boxes):
+
+        cls = int(box.cls)
+        conf = float(box.conf)
+
+        print(
+            f"{i+1}. {model.names[cls]} | Confidence = {conf:.3f}"
+        )
+
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+        cv2.rectangle(image, (x1, y1), (x2, y2), (0,255,0), 2)
+
+        cv2.putText(
+            image,
+            f"{model.names[cls]} {conf:.2f}",
+            (x1, y1-10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0,255,0),
+            2
+        )
+
+    cv2.imshow("YOLO Test", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 except Exception as e:
-    print("\n❌ ERROR")
     print(type(e).__name__)
     print(e)

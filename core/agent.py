@@ -51,3 +51,5 @@ class BaseAgent(ABC):
 
         self.status = AgentStatus.STOPPED
         self.logger.info(f"{self.name} stopped.")
+
+        

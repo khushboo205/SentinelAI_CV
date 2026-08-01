@@ -18,10 +18,10 @@ class DetectorAgent(BaseAgent):
     def process(self, packet: FramePacket):
 
         results = self.model.predict(
-            packet.frame,
+            source=packet.frame,
+            conf=0.35,
             verbose=False
         )
-
         detections = []
 
         names = self.model.names
