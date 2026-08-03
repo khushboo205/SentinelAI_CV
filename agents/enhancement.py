@@ -1,21 +1,23 @@
 from core.agent import BaseAgent
 from core.packet import TrackingPacket
-from services.ocr_service import OCRService
+from services.enhancer import Enhancer
 
 
-class OCRAgent(BaseAgent):
+class EnhancementAgent(BaseAgent):
 
     def __init__(self):
+        super().__init__("Enhancement")
 
-        super().__init__("OCR")
-
-        self.ocr = OCRService()
+        self.enhancer = Enhancer()
 
     def process(self, packet: TrackingPacket):
 
         frame = packet.frame_packet.frame
 
         for track in packet.tracks:
+
+            if not track.detection.is_blurry:
+                continue
 
             x1, y1, x2, y2 = map(int, track.detection.bbox)
 
@@ -24,8 +26,8 @@ class OCRAgent(BaseAgent):
             if roi.size == 0:
                 continue
 
-            texts = self.ocr.read(roi)
+            enhanced = self.enhancer.enhance(roi)
 
-            track.detection.ocr_text = texts
+            frame[y1:y2, x1:x2] = enhanced
 
         return packet

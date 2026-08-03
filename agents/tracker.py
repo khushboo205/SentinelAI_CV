@@ -4,6 +4,7 @@ from core.agent import BaseAgent
 from core.packet import DetectionPacket, TrackingPacket
 from core.models import Detection, Track
 from services.tracker import TrackingService
+from database.repository import Repository
 
 
 class TrackingAgent(BaseAgent):
@@ -12,6 +13,7 @@ class TrackingAgent(BaseAgent):
         super().__init__("TrackerAgent")
 
         self.tracker = TrackingService(model_path)
+        self.repository = Repository()
 
     def process(self, packet: DetectionPacket):
 
@@ -44,14 +46,16 @@ class TrackingAgent(BaseAgent):
                 track_id=int(track_id)
             )
 
-            tracks.append(
-                Track(
-                    track_id=int(track_id),
-                    detection=detection
-                )
+            track = Track(
+                track_id=int(track_id),
+                detection=detection
             )
+
+            self.repository.save_track(track)
+
+            tracks.append(track)   
 
         return TrackingPacket(
             frame_packet=packet.frame_packet,
             tracks=tracks
-        )
+        )     

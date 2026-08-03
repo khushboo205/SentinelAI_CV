@@ -3,17 +3,17 @@ import cv2
 from agents.input_manager import InputManagerAgent
 from agents.detector import DetectorAgent
 from services.visualizer import Visualizer
+from config.config import YOLO_MODEL
+
 
 
 def main():
 
     input_agent = InputManagerAgent(
-        "data/videos/input/sample.mp4"
+        "data/videos/sample2.mp4"
     )
 
-    detector = DetectorAgent(
-        "models/detectors/yolo11n.pt"
-    )
+    detector = DetectorAgent(str(YOLO_MODEL))
 
     visualizer = Visualizer()
 
