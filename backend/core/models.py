@@ -43,6 +43,12 @@ class Detection:
 
     # Events
     events: list[str] = field(default_factory=list)
+
+    risk_score: float = 0.0
+
+    is_suspicious: bool = False
+
+    risk_reasons: list[str] = field(default_factory=list)
 # ==========================================================
 # Track
 # ==========================================================

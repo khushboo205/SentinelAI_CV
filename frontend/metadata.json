@@ -1,0 +1,6 @@
+{
+  "name": "SentinelAI",
+  "description": "Intelligent Multi-Agent Forensic Investigation Platform for CCTV analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
