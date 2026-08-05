@@ -1,16 +1,13 @@
-from insightface.app import FaceAnalysis
+from services.model_manager import ModelManager
 
 
 class FaceService:
 
     def __init__(self):
 
-        self.app = FaceAnalysis()
+        manager = ModelManager()
 
-        self.app.prepare(
-            ctx_id=0,
-            det_size=(640, 640)
-        )
+        self.app = manager.load_face()
 
     def detect(self, image):
 

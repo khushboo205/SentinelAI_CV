@@ -17,9 +17,12 @@ class Detection:
     confidence: float
     class_id: int
     class_name: str
-
+    events: list = field(default_factory=list)
     track_id: Optional[int] = None
-
+    behavior: dict = field(default_factory=dict)
+    evidence: list = field(default_factory=list)
+    quality: dict = field(default_factory=dict)
+    camera_history: list = field(default_factory=list)
     # Image
     crop: Optional[Any] = None
 
@@ -42,13 +45,23 @@ class Detection:
     attributes: dict = field(default_factory=dict)
 
     # Events
-    events: list[str] = field(default_factory=list)
-
     risk_score: float = 0.0
 
     is_suspicious: bool = False
 
     risk_reasons: list[str] = field(default_factory=list)
+
+# ------------------------------
+# Investigation Reasoning
+# ------------------------------
+
+    reasoning: list[str] = field(default_factory=list)
+
+    priority: str = "LOW"
+
+    recommendations: list[str] = field(default_factory=list)
+
+    evidence_score: float = 0.0
 # ==========================================================
 # Track
 # ==========================================================

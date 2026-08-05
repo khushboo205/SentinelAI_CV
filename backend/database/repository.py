@@ -232,3 +232,584 @@ class Repository:
 
             (track_id,)
         )
+    def get_tracks(self):
+
+        return self.db.fetchall(
+            """
+            SELECT *
+            FROM tracks
+            ORDER BY track_id
+            """
+        )
+    def save_investigation(
+        self,
+        track_id,
+        class_name,
+        risk_score,
+        summary
+    ):
+
+        self.db.execute(
+            """
+            INSERT INTO investigation(
+                track_id,
+                class_name,
+                risk_score,
+                summary,
+                timestamp
+            )
+            VALUES(?,?,?,?,?)
+            """,
+            (
+                track_id,
+                class_name,
+                risk_score,
+                summary,
+                datetime.now().isoformat()
+            )
+        )
+    def save_timeline(
+        self,
+        track_id,
+        event
+    ):
+
+        self.db.execute(
+            """
+            INSERT INTO timeline(
+                track_id,
+                event,
+                timestamp
+            )
+            VALUES(?,?,?)
+            """,
+            (
+                track_id,
+                event,
+                datetime.now().isoformat()
+            )
+        )
+    def count_tracks(self):
+
+        row = self.db.fetchone(
+            "SELECT COUNT(*) AS total FROM tracks"
+        )
+
+        return row["total"]
+
+    def count_faces(self):
+
+        row = self.db.fetchone(
+            """
+            SELECT COUNT(*)
+            AS total
+            FROM faces
+            WHERE detected=1
+            """
+        )
+
+        return row["total"]
+
+    def count_events(self):
+
+        row = self.db.fetchone(
+            "SELECT COUNT(*) AS total FROM events"
+        )
+
+        return row["total"]
+
+    def count_risk(self):
+
+        row = self.db.fetchone(
+            """
+            SELECT COUNT(*)
+            AS total
+            FROM risk
+            WHERE suspicious=1
+            """
+        )
+
+        return row["total"]
+
+# =====================================================
+# CASES
+# =====================================================
+
+    def create_case(
+        self,
+        title,
+        description,
+        priority="MEDIUM",
+        assigned_officer=None
+    ):
+
+        self.db.execute(
+            """
+            INSERT INTO cases(
+                title,
+                description,
+                priority,
+                assigned_officer
+            )
+            VALUES(?,?,?,?)
+            """,
+            (
+                title,
+                description,
+                priority,
+                assigned_officer
+            )
+        )
+
+
+    def get_case(self, case_id):
+
+        return self.db.fetchone(
+            """
+            SELECT *
+            FROM cases
+            WHERE case_id=?
+            """,
+            (case_id,)
+        )
+
+
+    def list_cases(self):
+
+        return self.db.fetchall(
+            """
+            SELECT *
+            FROM cases
+            ORDER BY created_at DESC
+            """
+        )
+
+
+    def close_case(self, case_id):
+
+        self.db.execute(
+            """
+            UPDATE cases
+            SET status='CLOSED'
+            WHERE case_id=?
+            """,
+            (case_id,)
+        )
+
+
+    def assign_case(
+        self,
+        case_id,
+        officer
+    ):
+
+        self.db.execute(
+            """
+            UPDATE cases
+            SET assigned_officer=?
+            WHERE case_id=?
+            """,
+            (
+                officer,
+                case_id
+            )
+        )
+
+# =====================================================
+# EVIDENCE
+# =====================================================
+
+    def save_evidence(
+
+        self,
+
+        case_id,
+
+        track_id,
+
+        frame_number,
+
+        timestamp,
+
+        original_image,
+
+        enhanced_image,
+
+        quality_score,
+
+        risk_score
+
+    ):
+
+        self.db.execute(
+
+            """
+            INSERT INTO evidence(
+
+                case_id,
+
+                track_id,
+
+                frame_number,
+
+                timestamp,
+
+                original_image,
+
+                enhanced_image,
+
+                quality_score,
+
+                risk_score
+
+            )
+
+            VALUES(?,?,?,?,?,?,?,?)
+
+            """,
+
+            (
+
+                case_id,
+
+                track_id,
+
+                frame_number,
+
+                timestamp,
+
+                original_image,
+
+                enhanced_image,
+
+                quality_score,
+
+                risk_score
+
+            )
+
+        )
+
+
+    def get_evidence(
+
+        self,
+
+        case_id
+
+    ):
+
+        return self.db.fetchall(
+
+            """
+            SELECT *
+
+            FROM evidence
+
+            WHERE case_id=?
+
+            ORDER BY quality_score DESC
+
+            """,
+
+            (case_id,)
+
+        )
+    def get_best_evidence(self, case_id):
+
+        return self.db.fetchall(
+
+            """
+            SELECT *
+
+            FROM evidence
+
+            WHERE case_id=?
+
+            ORDER BY risk_score DESC,
+
+                    quality_score DESC
+
+            """,
+
+            (case_id,)
+
+        )
+
+    # =====================================================
+    # NOTES
+    # =====================================================
+
+    def add_note(
+
+        self,
+
+        case_id,
+
+        author,
+
+        note
+
+    ):
+
+        self.db.execute(
+
+            """
+            INSERT INTO notes(
+
+                case_id,
+
+                author,
+
+                note
+
+            )
+
+            VALUES(?,?,?)
+
+            """,
+
+            (
+
+                case_id,
+
+                author,
+
+                note
+
+            )
+
+        )
+
+
+    def get_notes(
+
+        self,
+
+        case_id
+
+    ):
+
+        return self.db.fetchall(
+
+            """
+            SELECT *
+
+            FROM notes
+
+            WHERE case_id=?
+
+            ORDER BY created_at DESC
+
+            """,
+
+            (case_id,)
+
+        )
+
+    # =====================================================
+    # RECOMMENDATIONS
+    # =====================================================
+
+    def save_recommendation(
+
+        self,
+
+        case_id,
+
+        recommendation,
+
+        confidence
+
+    ):
+
+        self.db.execute(
+
+            """
+            INSERT INTO recommendations(
+
+                case_id,
+
+                recommendation,
+
+                confidence
+
+            )
+
+            VALUES(?,?,?)
+
+            """,
+
+            (
+
+                case_id,
+
+                recommendation,
+
+                confidence
+
+            )
+
+        )
+
+
+    def get_recommendations(
+
+        self,
+
+        case_id
+
+    ):
+
+        return self.db.fetchall(
+
+            """
+            SELECT *
+
+            FROM recommendations
+
+            WHERE case_id=?
+
+            ORDER BY confidence DESC
+
+            """,
+
+            (case_id,)
+
+        )
+
+    # =====================================================
+    # RELATIONSHIPS
+    # =====================================================
+
+    def save_relationship(
+
+        self,
+
+        source_type,
+
+        source_id,
+
+        target_type,
+
+        target_id,
+
+        relation
+
+    ):
+
+        self.db.execute(
+
+            """
+            INSERT INTO relationships(
+
+                source_type,
+
+                source_id,
+
+                target_type,
+
+                target_id,
+
+                relation
+
+            )
+
+            VALUES(?,?,?,?,?)
+
+            """,
+
+            (
+
+                source_type,
+
+                source_id,
+
+                target_type,
+
+                target_id,
+
+                relation
+
+            )
+
+        )
+
+
+    def get_relationships(
+
+        self,
+
+        source_id
+
+    ):
+
+        return self.db.fetchall(
+
+            """
+            SELECT *
+
+            FROM relationships
+
+            WHERE source_id=?
+
+            """,
+
+            (source_id,)
+
+        )
+
+    def save_reasoning(
+
+        self,
+
+        track_id,
+
+        priority,
+
+        reasoning
+
+    ):
+
+        self.db.execute(
+
+            """
+            INSERT INTO reasoning(
+
+                track_id,
+
+                priority,
+
+                reasoning
+
+            )
+
+            VALUES(?,?,?)
+
+            """,
+
+            (
+
+                track_id,
+
+                priority,
+
+                reasoning
+
+            )
+
+        )
+        self.db.execute("""
+            CREATE TABLE IF NOT EXISTS reasoning(
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            track_id INTEGER,
+
+            priority TEXT,
+
+            reasoning TEXT
+
+        )
+        """)
+         

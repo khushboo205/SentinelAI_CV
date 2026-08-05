@@ -20,6 +20,32 @@ class EventAgent(BaseAgent):
 
             detection = track.detection
 
+            behavior = detection.behavior
+
+            behavior_name = behavior.get("name", "WALKING")
+
+            if behavior_name == "RUNNING":
+
+                detection.events.append(
+                    Event(
+                        event_type="RUNNING",
+                        track_id=detection.track_id,
+                        timestamp=datetime.now(),
+                        description="Person is running"
+                    )
+                )
+
+            elif behavior_name == "LOITERING":
+
+                detection.events.append(
+                    Event(
+                        event_type="LOITERING",
+                        track_id=detection.track_id,
+                        timestamp=datetime.now(),
+                        description="Person is loitering"
+                    )
+                )
+
             current_tracks.add(detection.track_id)
 
             # New Object

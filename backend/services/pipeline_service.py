@@ -1,32 +1,52 @@
-from threading import Lock
-from typing import Optional
-
-from core.pipeline_manager import PipelineManager
-from core.packet import TrackingPacket
+from core.pipeline_factory import create_pipeline
 
 
 class PipelineService:
-    """
-    Singleton service responsible for running the AI pipeline.
-    """
 
-    _instance = None
-    _lock = Lock()
+    def process_video(self, video_path):
 
-    def __new__(cls, *args, **kwargs):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super().__new__(cls)
-                cls._instance.pipeline = PipelineManager()
-        return cls._instance
+        pipeline, agents = create_pipeline(video_path)
 
-    def process(self) -> Optional[TrackingPacket]:
-        """
-        Runs one iteration of the pipeline.
-        """
-        return self.pipeline.run()
+        pipeline.initialize()
 
-    def get_status(self):
-        return {
-            "pipeline": "running"
-        }
+        try:
+
+            packet = pipeline.run()
+
+            tracks = []
+
+            for track in packet.tracks:
+
+                d = track.detection
+
+                tracks.append({
+
+                    "track_id": d.track_id,
+
+                    "class": d.class_name,
+
+                    "risk": d.risk_score,
+
+                    "alert": d.is_suspicious,
+
+                    "face": d.face_detected,
+
+                    "ocr": d.ocr_text,
+
+                    "features": d.features
+
+                })
+
+            return {
+
+                "status": "success",
+
+                "tracks": tracks
+
+            }
+
+        finally:
+
+            for agent in reversed(agents):
+
+                agent.shutdown()

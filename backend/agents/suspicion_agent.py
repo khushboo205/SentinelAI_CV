@@ -1,4 +1,5 @@
 from core.agent import BaseAgent
+from core.packet import TrackingPacket
 
 
 class SuspicionAgent(BaseAgent):
@@ -6,45 +7,101 @@ class SuspicionAgent(BaseAgent):
     def __init__(self):
         super().__init__("SuspicionAgent")
 
-    def process(self, packet):
+    def process(self, packet: TrackingPacket):
 
         for track in packet.tracks:
 
-            d = track.detection
+            detection = track.detection
 
-            d.risk_score = 0
-            d.risk_reasons.clear()
+            risk = 0
+            
+            reasons = []
 
-            # Face detected
-            if d.face_detected:
-                d.risk_score += 5
-                d.risk_reasons.append("Face detected")
+            # -----------------------------------------
+            # Score inferred events
+            # -----------------------------------------
 
-            # OCR detected
-            if d.ocr_text:
-                d.risk_score += 10
-                d.risk_reasons.append("OCR detected")
+            events = getattr(detection, "events", [])
 
-            # Large object
-            area = d.attributes.get("area", 0)
+            for event in events:
 
-            if area > 500000:
-                d.risk_score += 5
-                d.risk_reasons.append("Large object")
+                event_name = getattr(event, "event_type", "").upper()
 
-            # Dangerous classes
-            dangerous = {
-                "knife",
-                "gun",
-                "fire",
-                "explosion",
-                "weapon"
-            }
+                if event_name == "RUNNING":
+                    risk += 30
 
-            if d.class_name.lower() in dangerous:
-                d.risk_score += 100
-                d.risk_reasons.append("Dangerous object")
+                elif event_name == "LOITERING":
+                    risk += 30
 
-            d.is_suspicious = d.risk_score >= 20
+                elif event_name == "FACE_DETECTED":
+                    risk += 10
+
+                elif event_name == "OCR_FOUND":
+                    risk += 10
+
+                elif event_name == "OBJECT_ENTERED":
+                    risk += 5
+
+                reasons.append(event_name) 
+
+                                        
+
+            # -----------------------------------------
+            # Face Bonus
+            # -----------------------------------------
+
+            if getattr(detection, "face_detected", False):
+
+                risk += 10
+
+                reasons.append("Face detected")
+
+            # -----------------------------------------
+            # Large Object
+            # -----------------------------------------
+
+            x1, y1, x2, y2 = detection.bbox
+
+            area = abs(x2 - x1) * abs(y2 - y1)
+
+            if area > 100000:
+
+                risk += 10
+
+                reasons.append("Large Object")
+
+            # -----------------------------------------
+            # Cap Maximum Risk
+            # -----------------------------------------
+
+            risk = min(risk, 100)
+
+            # -----------------------------------------
+            # Risk Level
+            # -----------------------------------------
+
+            if risk >= 80:
+
+                level = "Critical"
+
+            elif risk >= 50:
+
+                level = "High"
+
+            elif risk >= 25:
+
+                level = "Medium"
+
+            else:
+
+                level = "Low"
+
+            detection.risk_score = risk
+
+            detection.priority = level
+
+            detection.is_suspicious = risk >= 50
+
+            detection.risk_reasons = list(set(reasons))
 
         return packet

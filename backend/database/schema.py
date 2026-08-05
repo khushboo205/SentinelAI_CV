@@ -131,3 +131,163 @@ class Schema:
             timestamp TEXT
         )
         """)
+
+# =====================================================
+# CASES
+# =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS cases(
+
+            case_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            title TEXT NOT NULL,
+
+            description TEXT,
+
+            status TEXT DEFAULT 'OPEN',
+
+            priority TEXT DEFAULT 'MEDIUM',
+
+            assigned_officer TEXT,
+
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+
+        )
+        """)
+
+        # =====================================================
+        # EVIDENCE
+        # =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS evidence(
+
+            evidence_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            case_id INTEGER,
+
+            track_id INTEGER,
+
+            frame_number INTEGER,
+
+            timestamp TEXT,
+
+            original_image TEXT,
+
+            enhanced_image TEXT,
+
+            quality_score REAL,
+
+            risk_score REAL,
+
+            FOREIGN KEY(case_id) REFERENCES cases(case_id)
+
+        )
+        """)
+
+        # =====================================================
+        # NOTES
+        # =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS notes(
+
+            note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            case_id INTEGER,
+
+            author TEXT,
+
+            note TEXT,
+
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(case_id) REFERENCES cases(case_id)
+
+        )
+        """)
+
+        # =====================================================
+        # RECOMMENDATIONS
+        # =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS recommendations(
+
+            recommendation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            case_id INTEGER,
+
+            recommendation TEXT,
+
+            confidence REAL,
+
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(case_id) REFERENCES cases(case_id)
+
+        )
+        """)
+
+        # =====================================================
+        # RELATIONSHIPS
+        # =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS relationships(
+
+            relation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            source_type TEXT,
+
+            source_id TEXT,
+
+            target_type TEXT,
+
+            target_id TEXT,
+
+            relation TEXT
+
+        )
+        """)
+
+        # =====================================================
+        # CAMERA HISTORY
+        # =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS camera_history(
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            track_id INTEGER,
+
+            camera TEXT,
+
+            frame INTEGER,
+
+            timestamp TEXT
+
+        )
+        """)
+
+        # =====================================================
+        # KNOWLEDGE GRAPH
+        # =====================================================
+
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS graph(
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            track_id INTEGER,
+
+            graph_json TEXT
+
+        )
+        """)
+
+        print("All SentinelAI tables created successfully.")

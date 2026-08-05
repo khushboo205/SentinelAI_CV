@@ -1,26 +1,23 @@
+from core.pipeline import Pipeline
+
+
 class PipelineManager:
 
     def __init__(self, agents):
 
-        self.agents = agents
+        self.pipeline = Pipeline()
+
+        for agent in agents:
+            self.pipeline.add_agent(agent)
 
     def initialize(self):
 
-        for agent in self.agents:
-            agent.initialize()
+        self.pipeline.initialize()
 
-    def run(self):
+    def process(self, packet):
 
-        packet = self.agents[0].process()
-
-        for agent in self.agents[1:]:
-
-            packet = agent.process(packet)
-
-        return packet
+        return self.pipeline.run(packet)
 
     def shutdown(self):
 
-        for agent in reversed(self.agents):
-
-            agent.shutdown()
+        self.pipeline.shutdown()

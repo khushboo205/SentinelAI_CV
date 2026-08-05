@@ -1,14 +1,12 @@
-import easyocr
-
+from services.model_manager import ModelManager
 
 class OCRService:
 
     def __init__(self):
 
-        self.reader = easyocr.Reader(
-            ["en"],
-            gpu=False
-        )
+        manager = ModelManager()
+
+        self.reader = manager.load_ocr()
 
     def read(self, image):
 

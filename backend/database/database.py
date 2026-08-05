@@ -10,6 +10,9 @@ class Database:
 
         Path(DATABASE_PATH).parent.mkdir(parents=True, exist_ok=True)
 
+        print("DATABASE PATH:", DATABASE_PATH)
+
+
         self.connection = sqlite3.connect(DATABASE_PATH)
 
         self.connection.row_factory = sqlite3.Row
